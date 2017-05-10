@@ -1,0 +1,33 @@
+{
+  "name": "ftpfs",
+  "version": "1.0.0",
+  "description": "an ftp client that expose the node fs API",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test/test.js"
+  },
+  "keywords": [],
+  "author": "max ogden",
+  "license": "ISC",
+  "dependencies": {
+    "ftp": "^0.3.10",
+    "pump": "^1.0.2",
+    "thunky": "^1.0.2"
+  },
+  "devDependencies": {
+    "ftpd": "^0.2.15",
+    "simple-ftp": "^1.0.3",
+    "tape": "^4.6.3"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maxogden/ftpfs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/maxogden/ftpfs/issues"
+  },
+  "homepage": "https://github.com/maxogden/ftpfs#readme"
+}
