@@ -10,8 +10,10 @@
   "author": "max ogden",
   "license": "ISC",
   "dependencies": {
+    "duplexify": "^3.5.0",
     "ftp": "^0.3.10",
     "pump": "^1.0.2",
+    "through2": "^2.0.3",
     "thunky": "^1.0.2"
   },
   "devDependencies": {
