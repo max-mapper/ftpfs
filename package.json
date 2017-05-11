@@ -1,6 +1,6 @@
 {
   "name": "ftpfs",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "an ftp client that expose the node fs API",
   "main": "index.js",
   "scripts": {
