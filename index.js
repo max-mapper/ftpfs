@@ -4,6 +4,8 @@ var thunky = require('thunky')
 var duplexify = require('duplexify')
 var pump = require('pump')
 var through = require('through2')
+var debug = require('debug')('ftpfs')
+var Stat = require('./stat.js')
 
 module.exports = FTPFS
 
@@ -19,6 +21,7 @@ function FTPFS (opts) {
     ftp.once('error', onErr)
     ftp.once('ready', function () {
       ftp.removeListener('error', onErr)
+      debug('ftp connected')
       cb()
     })
     ftp.connect(opts)
@@ -31,6 +34,7 @@ FTPFS.prototype.readdir = function (file, cb) {
   var self = this
   this.connect(function (err) {
     if (err) return cb(err)
+    debug('readdir', file)
     self.ftp.list(file, function (err, list) {
       if (err) return cb(err)
       cb(null, list.map(function (i) { return i.name }))
@@ -44,6 +48,7 @@ FTPFS.prototype.createReadStream = function (file) {
   
   this.connect(function (err) {
     if (err) return duplex.destroy(err)
+    debug('createReadStream', file)
     self.ftp.get(file, function (err, reader) {
       if (err) return duplex.destroy(err)
       
@@ -66,27 +71,49 @@ FTPFS.prototype.stat = FTPFS.prototype.lstat = function (file, cb) {
     if (err) return cb(err)
     var dir = path.dirname(file)
     var basename = path.basename(file)
+    
+    var isFolder = false
+    if (!basename) {
+      isFolder = true
+      if (dir === '/') return cb(null, mkstat({
+        size: 136,
+        type: 'directory',
+        mode: 16877,
+        date: new Date(0)
+      }))
+      basename = path.split('/').pop()
+      dir = path.resolve(dir, '..')
+    }
+    
+    debug('stat', file, dir)
     self.ftp.list(dir, function (err, list) {
       if (err) return cb(err)
       var info = list.find(function (l) { return l.name === basename })
-      if (!info) return cb(new Error('file not found'))
-      var stat = {
-        dev: 1,
-        mode: 33188,
-        nlink: 1,
-        uid: 1,
-        gid: 1,
-        rdev: 1,
-        blksize: 4096,
-        ino: 1,
-        size: info.size,
-        blocks: 1,
-        atime: info.date,
-        mtime: info.date,
-        ctime: info.date,
-        birthtime: info.date
+      if (!info) {
+        debug('file not found', list)
+        return cb(new Error('file not found'))
       }
+      if (info.type === 'd') {
+        info.size = 136
+        info.mode = 16877
+        info.type = 'directory'
+      } else {
+        info.type = 'file'
+      }
+      var stat = mkstat(info)
       cb(null, stat)
     })
   })
+  
+  function mkstat (info) {
+    return new Stat({
+      mode: info.mode || 33188,
+      type: info.type,
+      size: info.size,
+      atime: info.date,
+      mtime: info.date,
+      ctime: info.date,
+      birthtime: info.date
+    })
+  }
 }
