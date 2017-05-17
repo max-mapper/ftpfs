@@ -103,8 +103,8 @@ FTPFS.prototype.stat = FTPFS.prototype.lstat = function (file, cb) {
     })
     
     function createStat (list) {
-      var info = list.find(function (l) { return l.name === basename })
-      info = extend({}, info) // clone
+      var match = list.find(function (l) { return l.name === basename })
+      info = extend({}, match) // clone
       if (!info) {
         debug('file not found', list)
         return cb(new Error('file not found'))
@@ -117,6 +117,7 @@ FTPFS.prototype.stat = FTPFS.prototype.lstat = function (file, cb) {
         info.type = 'file'
       }
       var stat = mkstat(info)
+      stat._ftpmetadata = match
       cb(null, stat)
     }
   })

@@ -10,14 +10,17 @@
   "author": "max ogden",
   "license": "ISC",
   "dependencies": {
+    "debug": "^2.6.6",
     "duplexify": "^3.5.0",
     "ftp": "^0.3.10",
+    "mirror-folder": "^2.1.0",
     "pump": "^1.0.2",
     "through2": "^2.0.3",
     "thunky": "^1.0.2",
     "xtend": "^4.0.1"
   },
   "devDependencies": {
+    "connections": "^1.4.2",
     "ftpd": "^0.2.15",
     "simple-ftp": "^1.0.3",
     "tape": "^4.6.3"

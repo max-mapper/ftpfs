@@ -2,20 +2,24 @@ var test = require('tape')
 var child = require('child_process')
 var concat = require('concat-stream')
 var ftpd = require('ftpd')
+var connections = require('connections')
 var ftpfs = require('../')
 
 var server
+var sockets = []
 var ftp = ftpfs({ port: 2121 })
 
-test('start server', function (t) {
+test('start test server', function (t) {
   server = new ftpd.FtpServer('127.0.0.1', {
   	getInitialCwd: function () { return  './' },
   	getRoot: function() { return __dirname }
   })
   
+  server.connections = connections(server.server)
   server.debugging = 2
   
   server.on('client:connected', function (connection) {
+    sockets.push(connection.socket)
   	connection.on('command:user', function (user, success, failure) {
       success()
     })
@@ -56,9 +60,9 @@ test('stat', function (t) {
 })
 
 test('teardown', function (t) {
-  ftp.end()
   server.close()
+  ftp.end()
   t.ok(true, 'tearing down')
   t.end()
-  process.exit(0) // hack, open socket somewhere
+  process.exit(0) // hack, open socket somewhere in server (couldnt figure it out)
 })
