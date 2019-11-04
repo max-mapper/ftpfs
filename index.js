@@ -7,6 +7,7 @@ var through = require('through2')
 var extend = require('xtend')
 var debug = require('debug')('ftpfs')
 var Stat = require('./stat.js')
+var util = require('util')
 
 module.exports = FTPFS
 
@@ -134,4 +135,80 @@ FTPFS.prototype.stat = FTPFS.prototype.lstat = function (file, cb) {
       birthtime: info.date
     })
   }
+}
+
+FTPFS.prototype.statSync = FTPFS.prototype.lstatSync = async function (file) {
+  return await util.promisify(this.stat)(file);
+}
+
+
+FTPFS.prototype.readFile = function (file, encoding, cb) {
+  if (arguments.length === 2) cb = encoding;
+  var self = this;
+  var string = '';
+  var stream = self.createReadStream(file);
+  stream.on('error', cb);
+  stream.on('data',function(data){
+    string += data.toString();
+  });
+  stream.on('end',function(){
+    cb(null, string);
+  });
+}
+
+FTPFS.prototype.readFileSync = async function (file, encoding) {
+  return await util.promisify(this.readFile)(file, encoding);
+};
+
+
+FTPFS.prototype.mkdir = function (dir, cb) {
+  var self = this
+  this.connect(function (err) {
+    if (err) return cb(err)
+    debug('mkdir', dir)
+
+    self.ftp.mkdir(dir, cb)
+  })
+}
+
+FTPFS.prototype.rmdir = function (dir, cb) {
+  var self = this
+  this.connect(function (err) {
+    if (err) return cb(err)
+    debug('rmdir', dir)
+
+    self.ftp.rmdir(dir, cb)
+  })
+}
+
+
+FTPFS.prototype.unlink = function (file, cb) {
+  var self = this
+  this.connect(function (err) {
+    if (err) return cb(err)
+    debug('unlink', file)
+
+    self.ftp.delete(file, cb)
+  })
+}
+
+FTPFS.prototype.rename = function (oldPath, newPath, cb) {
+  var self = this
+  this.connect(function (err) {
+    if (err) return cb(err)
+    debug('rename', oldPath, newPath)
+
+    self.ftp.rename(oldPath, newPath, cb)
+  })
+}
+
+FTPFS.prototype.writeFile = function (file, data, options, cb) {
+  if (arguments.length === 3) cb = options;
+  var self = this
+  this.connect(function (err) {
+    if (err) return cb(err)
+    debug('writeFile', file, options)
+
+    self.ftp.put(file, Buffer.from(data, 'utf-8'), cb)
+  })
 }
