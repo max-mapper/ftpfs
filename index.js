@@ -144,6 +144,7 @@ FTPFS.prototype.statSync = FTPFS.prototype.lstatSync = async function (file) {
 
 FTPFS.prototype.readFile = function (file, encoding, cb) {
   if (arguments.length === 2) cb = encoding;
+  var self = this;
   var string = '';
   var stream = self.createReadStream(file);
   stream.on('error', cb);
